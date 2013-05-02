@@ -1,6 +1,9 @@
+#include <iostream>
+
 #include <stdlib.h>
 #include <vector>
 #include <stack>
+#include <exception>
 
 template <typename T>
 struct Node {
@@ -16,10 +19,10 @@ struct Node {
 template <typename T>
 int compare(Node<T>* lhs, T rhs) {
   if (lhs->key < rhs) {
-    return -1;
+    return 1;
   }
   if (rhs < lhs->key) {
-    return 1;
+    return -1;
   }
   return 0;
 }
@@ -43,19 +46,20 @@ class SplayTree {
 
   SplayTree(const std::vector<T>& keys) : SplayTree(keys[0]) {
     for (auto it = keys.cbegin() + 1; it != keys.cend(); ++it) {
-      this->add(keys[i]);
+      this->add(*it);
     }
   }
 
   Node<T>* add(T key) {
     add(key, root);
+    std::cout << "root: " << root->key << std::endl;
     return root;
   }
 
   Node<T>* remove(T key) {
     Node<T>* removed = find(key);
     if (!removed) {
-      throw std::exception;
+      throw std::exception();
     }
     remove(removed);
     return root;
@@ -88,27 +92,32 @@ class SplayTree {
  private:
   void add(T key, Node<T>* node) {
     while (node) {
+      std::cout << "node: " << node->key << std::endl;
       switch (compare(node, key)) {
         case 0:
+          std::cout << "node: match " << node->key << std::endl;
           splay(node);
           return;
         case -1:
           if (!node->left) {
+            std::cout << "left" << std::endl;
             node->left = new Node<T>(key, node);
             splay(node->left);
             return;
           }
+          std::cout << "left: " << node->left->key << std::endl;
           node = node->left;
           break;
         case 1:
           if (!node->right) {
+            std::cout << "right" << std::endl;
             node->right = new Node<T>(key, node);
             splay(node->right);
             return;
           }
           node = node->right;
+      }
     }
-    splay(node);
   }
 
   void remove(Node<T>* node) {
@@ -160,6 +169,7 @@ class SplayTree {
   }
   
   void splay(Node<T>* node) {
+    std::cout << "splay: " << node->key << std::endl;
     while (node->parent) {
       if (!node->parent->parent) { // ZIG
         if (node->parent->left == node) {
@@ -191,16 +201,20 @@ class SplayTree {
   
   Node<T>* rotateRight(Node<T>* node) {
     Node<T>* up = node->left;
+    node->left = up->right;
+    if (up->right) {
+      up->right->parent = node;
+    }
+    up->parent = node->parent;
     if (node->parent) {
       if (node->parent->left == node) {
         node->parent->left = up;
       } else {
         node->parent->right = up;
       }
+    } else {
+      root = up;
     }
-    up->parent = node->parent;
-    node->left = up->right;
-    up->right->parent = node;
     up->right = node;
     node->parent = up;
     return up;
@@ -208,16 +222,20 @@ class SplayTree {
 
   Node<T>* rotateLeft(Node<T>* node) {
     Node<T>* up = node->right;
+    node->right = up->left;
+    if (up->left) {
+      up->left->parent = node;
+    }
+    up->parent = node->parent;
     if (node->parent) {
       if (node->parent->right == node) {
         node->parent->right = up;
       } else {
         node->parent->left = up;
       }
+    } else {
+      root = up;
     }
-    up->parent = node->parent;
-    node->right = up->left;
-    up->left->parent = node;
     up->left = node;
     node->parent= up;
     return up;
@@ -232,5 +250,14 @@ class SplayTree {
 };
 
 int main() {
+  SplayTree<int> tree(0);
+  int a[] = {0, 1, 2, 98, 99, 7, 2, 0};
+  for (auto x : a) {
+    std::cout << "x = " << x << std::endl;
+    tree.add(x);
+  }
+  for (auto i = 0; i < 7; ++i) {
+    std::cout << tree.find(a[i])->key << std::endl;
+  }
   return 0;
 }
