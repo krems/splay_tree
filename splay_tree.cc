@@ -52,7 +52,6 @@ class SplayTree {
 
   Node<T>* add(T key) {
     add(key, root);
-    std::cout << "root: " << root->key << std::endl;
     return root;
   }
 
@@ -92,25 +91,20 @@ class SplayTree {
  private:
   void add(T key, Node<T>* node) {
     while (node) {
-      std::cout << "node: " << node->key << std::endl;
       switch (compare(node, key)) {
         case 0:
-          std::cout << "node: match " << node->key << std::endl;
           splay(node);
           return;
         case -1:
           if (!node->left) {
-            std::cout << "left" << std::endl;
             node->left = new Node<T>(key, node);
             splay(node->left);
             return;
           }
-          std::cout << "left: " << node->left->key << std::endl;
           node = node->left;
           break;
         case 1:
           if (!node->right) {
-            std::cout << "right" << std::endl;
             node->right = new Node<T>(key, node);
             splay(node->right);
             return;
@@ -121,13 +115,33 @@ class SplayTree {
   }
 
   void remove(Node<T>* node) {
-    // todo: null chek
+    if (!node->left && !node->right) {
+      if (node->parent) {
+        if (node->parent->right == node) {
+          node->parent->right = 0;
+        } else {
+          node->parent->left = 0;
+        }
+      }
+      delete node;
+      return;
+    }
     splay(node);
     Node<T>* lhs = node->left;
     Node<T>* rhs = node->right;
-    lhs->parent = 0;
-    rhs->parent = 0;
     delete root;
+    if (!lhs) {
+      root = rhs;
+      rhs->parent = 0;
+      return;
+    }
+    if (!rhs) {
+      lhs->parent = 0;
+      root = lhs;
+      return;
+    }
+    rhs->parent = 0;
+    lhs->parent = 0;
     Node<T>* newRoot = findMax(lhs);
     splay(newRoot);
     newRoot->right = rhs;
@@ -169,7 +183,6 @@ class SplayTree {
   }
   
   void splay(Node<T>* node) {
-    std::cout << "splay: " << node->key << std::endl;
     while (node->parent) {
       if (!node->parent->parent) { // ZIG
         if (node->parent->left == node) {
@@ -256,7 +269,9 @@ int main() {
     std::cout << "x = " << x << std::endl;
     tree.add(x);
   }
-  for (auto i = 0; i < 7; ++i) {
+  std::cout << tree.remove(0)->key << std::endl;
+  std::cout << tree.remove(1)->key << std::endl;
+  for (auto i = 2; i < 7; ++i) {
     std::cout << tree.find(a[i])->key << std::endl;
   }
   return 0;
