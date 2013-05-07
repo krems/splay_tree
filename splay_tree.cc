@@ -35,16 +35,21 @@ class SplayTree {
     root = new Node<T>(key);
   }
   
-  SplayTree() : SplayTree(0) {};
+  SplayTree() {
+    root = new Node<T>(0);
+  };
 
   template <size_t N>
-  SplayTree(T (&keys)[N]) : SplayTree(keys[0]) {
+  SplayTree(T (&keys)[N]) { // : SplayTree(keys[0]) { // My compiler
+                              // didn't work with that c++0x feature
+    root = new Node<T>(keys[0]);
     for (size_t i = 1; i < N; ++i) {
       this->add(keys[i]);
     }
   }
 
-  SplayTree(const std::vector<T>& keys) : SplayTree(keys[0]) {
+  SplayTree(const std::vector<T>& keys) { // : SplayTree(keys[0]) {
+    root = new Node<T>(keys[0]);
     for (auto it = keys.cbegin() + 1; it != keys.cend(); ++it) {
       this->add(*it);
     }
@@ -263,12 +268,14 @@ class SplayTree {
 };
 
 int main() {
-  SplayTree<int> tree(0);
+  //  SplayTree<int> tree(0);               
   int a[] = {0, 1, 2, 98, 99, 7, 2, 0};
-  for (auto x : a) {
-    std::cout << "x = " << x << std::endl;
-    tree.add(x);
-  }
+  // for (auto x : a) {
+  //   std::cout << "x = " << x << std::endl;
+  //   tree.add(x);
+  // }
+  std::vector<int> b {0, 1, 2, 98, 99, 7, 2, 0};
+  SplayTree<int> tree(b);
   std::cout << tree.remove(0)->key << std::endl;
   std::cout << tree.remove(1)->key << std::endl;
   for (auto i = 2; i < 7; ++i) {
